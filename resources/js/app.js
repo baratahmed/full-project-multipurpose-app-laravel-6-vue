@@ -9,6 +9,9 @@ require('./bootstrap');
 window.Vue = require('vue');
 import moment from 'moment';
 import { Form, HasError, AlertError } from 'vform';
+import Gate from './Gate';
+Vue.prototype.$gate = new Gate(window.user);
+
 import Swal from 'sweetalert2'
 window.Swal = Swal;
 
@@ -29,6 +32,9 @@ window.Toast = Toast;
 window.Form = Form;
 Vue.component(HasError.name, HasError)
 Vue.component(AlertError.name, AlertError)
+Vue.component('pagination', require('laravel-vue-pagination'));
+
+
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
@@ -42,14 +48,17 @@ Vue.use(VueProgressBar,{
 
 let routes = [
     { path: '/dashboard', component: require('./components/Dashboard.vue').default },
+    { path: '/developer', component: require('./components/Developer.vue').default },
     { path: '/users', component: require('./components/Users.vue').default },
     { path: '/profile', component: require('./components/Profile.vue').default },
+    { path: '*', component: require('./components/NotFound.vue').default },
     
   ]
 
 const router = new VueRouter({
     mode: 'history',
-    routes // short for `routes: routes`
+    routes, // short for `routes: routes`
+
   })
 
 
@@ -66,6 +75,28 @@ Vue.filter('myDate', function(created){
 
 window.Fire =  new Vue();
 
+
+Vue.component(
+  'passport-clients',
+  require('./components/passport/Clients.vue').default
+);
+
+Vue.component(
+  'passport-authorized-clients',
+  require('./components/passport/AuthorizedClients.vue').default
+);
+
+Vue.component(
+  'passport-personal-access-tokens',
+  require('./components/passport/PersonalAccessTokens.vue').default
+);
+
+Vue.component(
+  'not-found',
+  require('./components/NotFound.vue').default
+);
+
+
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 
 /**
@@ -76,5 +107,16 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
 
 const app = new Vue({
     el: '#app',
-    router
+    router,
+    data:{
+      search: "",
+    },
+    methods:{
+        searchit: _.debounce(()=>{
+          Fire.$emit('searching');
+        },1000),
+        printme() {
+          window.print();
+      }
+    }
 });
